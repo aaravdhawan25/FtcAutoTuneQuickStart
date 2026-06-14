@@ -117,7 +117,7 @@ public class PositionPIDTunerOpMode extends LinearOpMode {
             return;
         }
 
-        List<PIDGains> candidates = ZieglerNicholsCalculator.computeCandidates(result, 0.0);
+        List<PIDGains> candidates = ZieglerNicholsCalculator.computeCandidates(result, 0.0, TuningConfig.TUNE_INTEGRAL_TERM);
 
         // Default to the "no overshoot" candidate (index 2) for the live test --
         // safest starting point for arms/lifts.

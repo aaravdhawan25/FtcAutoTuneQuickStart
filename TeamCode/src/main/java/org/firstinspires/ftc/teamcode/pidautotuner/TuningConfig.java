@@ -37,6 +37,14 @@ public final class TuningConfig {
     /** Safety timeout for the relay test, in seconds, in case the system never oscillates. */
     public static final double RELAY_TEST_TIMEOUT_S = 15.0;
 
+    /**
+     * If false, every candidate gain set has {@code kI = 0} and is computed
+     * using the Ziegler-Nichols PD (instead of PID) rule family. Common
+     * choice for velocity/flywheel loops where {@code kF} already handles
+     * steady-state error and an integral term mainly risks windup.
+     */
+    public static final boolean TUNE_INTEGRAL_TERM = false;
+
     // ---- Position tuner specific ----------------------------------------
 
     /**

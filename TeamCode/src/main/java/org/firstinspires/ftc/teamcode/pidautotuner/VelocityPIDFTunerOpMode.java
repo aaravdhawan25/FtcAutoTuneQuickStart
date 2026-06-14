@@ -169,7 +169,7 @@ public class VelocityPIDFTunerOpMode extends LinearOpMode {
         // power fraction needed to sustain MAX_RPM.
         double kFNormalized = kFRaw * TuningConfig.MAX_RPM;
 
-        List<PIDGains> candidates = ZieglerNicholsCalculator.computeCandidates(result, kFRaw);
+        List<PIDGains> candidates = ZieglerNicholsCalculator.computeCandidates(result, kFRaw, TuningConfig.TUNE_INTEGRAL_TERM);
 
         // Default to the "classic ZN" candidate for the live test.
         PIDGains liveTestGains = candidates.get(4);
