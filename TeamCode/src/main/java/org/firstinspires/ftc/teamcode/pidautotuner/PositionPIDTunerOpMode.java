@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.pidautotuner;
 
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import java.util.List;
 
@@ -120,8 +122,7 @@ public class PositionPIDTunerOpMode extends LinearOpMode {
         // Default to the "no overshoot" candidate (index 2) for the live test --
         // safest starting point for arms/lifts.
         PIDGains liveTestGains = candidates.get(2);
-        PIDFController liveController = PIDFController.fromGains(liveTestGains);
-        liveController.setOutputBounds(-1.0, 1.0);
+        PIDController liveController = new PIDController(liveTestGains.kP, liveTestGains.kI, liveTestGains.kD);
 
         boolean liveTestRunning = false;
 
@@ -146,15 +147,15 @@ public class PositionPIDTunerOpMode extends LinearOpMode {
             if (gamepad1.a) {
                 if (!liveTestRunning) {
                     liveController.reset();
-                    timer.reset();
                     liveTestRunning = true;
                 }
                 int position = motor.getCurrentPosition();
-                double output = liveController.calculate(setpoint, position, timer.seconds());
+                double output = liveController.calculate(position, setpoint);
+                output = Range.clip(output, -1.0, 1.0);
                 motor.setPower(output);
 
                 telemetry.addLine();
-                telemetry.addLine("=== LIVE TEST ACTIVE ===");
+                telemetry.addLine("=== LIVE TEST ACTIVE (FTCLib PIDController) ===");
                 telemetry.addData("Position", position);
                 telemetry.addData("Setpoint", "%.1f", setpoint);
                 telemetry.addData("Error", "%.1f", setpoint - position);
