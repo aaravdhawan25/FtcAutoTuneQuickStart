@@ -1,7 +1,6 @@
 repositories {
     mavenCentral()
     google() // Needed for androidx
-    maven { url = 'https://jitpack.io' } // Needed for FtcAutoTune
 }
 
 dependencies {
@@ -15,9 +14,13 @@ dependencies {
     implementation 'org.firstinspires.ftc:Vision:11.1.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
-    // FtcAutoTune: relay-feedback PID/PIDF auto tuner
-    // https://github.com/aaravdhawan25/FtcAutoTune
-    implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-core:v0.1.1'
-    implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-ftc:v0.1.1'
+    // FtcAutoTune source is vendored directly into
+    // TeamCode/src/main/java/org/firstinspires/ftc/teamcode/pidautotuner/
+    // (see https://github.com/aaravdhawan25/FtcAutoTune), so no JitPack
+    // dependency is needed here. If you'd rather pull it as a binary
+    // dependency instead, remove the vendored 'pidautotuner' package and
+    // uncomment the lines below (requires the JitPack repo block above).
+    // implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-core:v0.1.1'
+    // implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-ftc:v0.1.1'
 }
 
