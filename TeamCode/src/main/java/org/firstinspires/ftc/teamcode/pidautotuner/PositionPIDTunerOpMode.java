@@ -1,19 +1,19 @@
 package org.firstinspires.ftc.teamcode.pidautotuner;
 
-import com.arcrobotics.ftclib.controller.PIDController;
+import com.aaravdhawan25.pidautotuner.ftc.PIDMaster;
+import com.aaravdhawan25.pidautotuner.ftc.TuningConfig;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-import java.util.List;
 
 /**
  * Auto-tunes PID gains for a run-to-position mechanism (arm, lift, turret,
  * etc.) using the relay-feedback method.
+ *
+ * <p>All of the actual logic (relay test, candidate computation, live test)
+ * lives in {@link PIDMaster}, which comes from the {@code pidautotuner-ftc}
+ * JitPack dependency. This OpMode and {@link TuningConfig} are the only two
+ * files you need to copy into your own TeamCode -- everything else is
+ * resolved via the library dependency.
  *
  * <h2>Setup</h2>
  * <ol>
@@ -26,30 +26,26 @@ import java.util.List;
  *     <li>Run this OpMode. Press start, then stand back -- the mechanism will
  *         oscillate on its own for a few seconds.</li>
  *     <li>Read the candidate gain sets off the Driver Station telemetry.</li>
- *     <li>Optional: press gamepad1.a to live-test a candidate by holding the
- *         mechanism at the target position with a real PID loop.</li>
+ *     <li>Optional: hold gamepad1.a to live-test the "no overshoot" candidate
+ *         by holding the mechanism at the target position with a real PID loop.</li>
  * </ol>
  *
  * <h2>Notes</h2>
  * <p>For mechanisms affected by gravity (arms, lifts), the relay test alone
- * will not capture a gravity feedforward term -- the "PID (no overshoot)" or
- * "PID (some overshoot)" candidates are usually the best starting points, and
- * you may still need to add a constant gravity feedforward
- * ({@code kF * cos(angle)} or similar) on top of these gains in your final
- * code.
+ * will not capture a gravity feedforward term -- you may still need to add a
+ * constant gravity feedforward ({@code kF * cos(angle)} or similar) on top of
+ * these gains in your final code.
  */
-@TeleOp(name = "PID Auto Tuner (Position) [Local]")
+@TeleOp(name = "PID Auto Tuner (Position)")
 public class PositionPIDTunerOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        DcMotorEx motor = hardwareMap.get(DcMotorEx.class, TuningConfig.MOTOR_NAME);
-        motor.setDirection(TuningConfig.REVERSED
-                ? DcMotorSimple.Direction.REVERSE
-                : DcMotorSimple.Direction.FORWARD);
-        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        PIDMaster pid = new PIDMaster(
+                hardwareMap, TuningConfig.MOTOR_NAME, TuningConfig.REVERSED, true,
+                TuningConfig.POSITION_TARGET_TICKS, TuningConfig.POSITION_HYSTERESIS_TICKS,
+                TuningConfig.RELAY_AMPLITUDE, TuningConfig.CYCLES_TO_COLLECT, TuningConfig.CYCLES_TO_IGNORE,
+                TuningConfig.RELAY_TEST_TIMEOUT_S, null, 0, TuningConfig.TUNE_INTEGRAL_TERM);
 
         telemetry.addLine("=== PID Auto Tuner (Position) ===");
         telemetry.addData("Motor", TuningConfig.MOTOR_NAME);
@@ -60,116 +56,35 @@ public class PositionPIDTunerOpMode extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        int startPosition = motor.getCurrentPosition();
-        double setpoint = startPosition + TuningConfig.POSITION_TARGET_TICKS;
-
-        RelayAutoTuner tuner = new RelayAutoTuner(
-                setpoint,
-                TuningConfig.RELAY_AMPLITUDE,
-                TuningConfig.POSITION_HYSTERESIS_TICKS,
-                TuningConfig.CYCLES_TO_COLLECT,
-                TuningConfig.CYCLES_TO_IGNORE
-        );
-
-        ElapsedTime timer = new ElapsedTime();
-        boolean timedOut = false;
-
-        while (opModeIsActive() && !tuner.isFinished()) {
-            double now = timer.seconds();
-            int position = motor.getCurrentPosition();
-            double output = tuner.update(position, now);
-            motor.setPower(output);
-
-            telemetry.addLine("=== Tuning in progress ===");
-            telemetry.addData("Position", position);
-            telemetry.addData("Setpoint", "%.1f", setpoint);
-            telemetry.addData("Cycles collected", "%d / %d", tuner.cyclesCollected(),
-                    TuningConfig.CYCLES_TO_COLLECT + TuningConfig.CYCLES_TO_IGNORE);
-            telemetry.addData("Elapsed (s)", "%.1f", now);
+        // Phase 1: relay test (runs automatically)
+        while (opModeIsActive() && !pid.isTuningComplete()) {
+            pid.tuningStep(getRuntime());
+            for (String line : pid.getTelemetryLines()) telemetry.addLine(line);
             telemetry.update();
+        }
 
-            if (now > TuningConfig.RELAY_TEST_TIMEOUT_S) {
-                timedOut = true;
-                break;
+        if (pid.timedOut() || !pid.isTuningSuccessful()) {
+            while (opModeIsActive()) {
+                telemetry.clearAll();
+                for (String line : pid.getTelemetryLines()) telemetry.addLine(line);
+                telemetry.update();
             }
-        }
-
-        motor.setPower(0);
-
-        if (timedOut) {
-            telemetry.clearAll();
-            telemetry.addLine("=== Tuning TIMED OUT ===");
-            telemetry.addLine("The mechanism didn't complete enough oscillation");
-            telemetry.addLine("cycles. Try increasing RELAY_AMPLITUDE, or check");
-            telemetry.addLine("that the motor/encoder are wired correctly.");
-            telemetry.update();
-            while (opModeIsActive()) idle();
             return;
         }
 
-        RelayTuningResult result = tuner.computeResult();
-        if (result == null) {
-            telemetry.clearAll();
-            telemetry.addLine("=== Tuning FAILED ===");
-            telemetry.addLine("Not enough oscillation amplitude was measured.");
-            telemetry.update();
-            while (opModeIsActive()) idle();
-            return;
-        }
-
-        List<PIDGains> candidates = ZieglerNicholsCalculator.computeCandidates(result, 0.0, TuningConfig.TUNE_INTEGRAL_TERM);
-
-        // Default to the "no overshoot" candidate (index 2) for the live test --
-        // safest starting point for arms/lifts.
-        PIDGains liveTestGains = candidates.get(2);
-        PIDController liveController = new PIDController(liveTestGains.kP, liveTestGains.kI, liveTestGains.kD);
-
-        boolean liveTestRunning = false;
-
+        // Phase 2: show results, optionally live-test
         while (opModeIsActive()) {
             telemetry.clearAll();
-            telemetry.addLine("=== Relay Test Result ===");
-            telemetry.addData("Ku", "%.5f", result.Ku);
-            telemetry.addData("Tu (s)", "%.4f", result.Tu);
-            telemetry.addData("Oscillation amplitude (ticks)", "%.1f", result.amplitude);
-            telemetry.addLine();
-            telemetry.addLine("=== Candidate PID Gains ===");
-            for (PIDGains gains : candidates) {
-                telemetry.addLine(gains.toString());
-            }
-            telemetry.addLine();
-            telemetry.addLine("Copy a candidate's kP/kI/kD into your code.");
-            telemetry.addLine("'no overshoot' is the safest starting point.");
-            telemetry.addLine();
-            telemetry.addLine("Hold A to live-test the 'no overshoot' gains");
-            telemetry.addLine("by holding the mechanism at the target position.");
+            for (String line : pid.getResultTelemetryLines()) telemetry.addLine(line);
 
             if (gamepad1.a) {
-                if (!liveTestRunning) {
-                    liveController.reset();
-                    liveTestRunning = true;
-                }
-                int position = motor.getCurrentPosition();
-                double output = liveController.calculate(position, setpoint);
-                output = Range.clip(output, -1.0, 1.0);
-                motor.setPower(output);
-
                 telemetry.addLine();
-                telemetry.addLine("=== LIVE TEST ACTIVE (FTCLib PIDController) ===");
-                telemetry.addData("Position", position);
-                telemetry.addData("Setpoint", "%.1f", setpoint);
-                telemetry.addData("Error", "%.1f", setpoint - position);
-                telemetry.addData("Output power", "%.3f", output);
+                for (String line : pid.liveTestStep(getRuntime())) telemetry.addLine(line);
             } else {
-                if (liveTestRunning) {
-                    motor.setPower(0);
-                    liveTestRunning = false;
-                }
+                pid.stopLiveTest();
             }
 
             telemetry.update();
         }
-
-        motor.setPower(0);
     }
 }

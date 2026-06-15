@@ -17,6 +17,11 @@ public final class TuningConfig {
     /** Set true if positive power should move the mechanism toward a *lower* encoder reading. */
     public static final boolean REVERSED = false;
 
+
+    /** Set true if running position pid tuning OpMode */
+
+    public static final boolean PositionPIDtuner = false;
+
     // ---- Relay test tuning ---------------------------------------------
 
     /**
@@ -36,14 +41,6 @@ public final class TuningConfig {
 
     /** Safety timeout for the relay test, in seconds, in case the system never oscillates. */
     public static final double RELAY_TEST_TIMEOUT_S = 15.0;
-
-    /**
-     * If false, every candidate gain set has {@code kI = 0} and is computed
-     * using the Ziegler-Nichols PD (instead of PID) rule family. Common
-     * choice for velocity/flywheel loops where {@code kF} already handles
-     * steady-state error and an integral term mainly risks windup.
-     */
-    public static final boolean TUNE_INTEGRAL_TERM = false;
 
     // ---- Position tuner specific ----------------------------------------
 
@@ -83,42 +80,11 @@ public final class TuningConfig {
     /** How long to hold each feedforward test power before sampling, in seconds. */
     public static final double FEEDFORWARD_SETTLE_TIME_S = 1.5;
 
-    // ---- RPM units (FTCLib-style velocity tuning) --------------------------
-
     /**
-     * Encoder ticks per revolution of the OUTPUT shaft you're measuring
-     * (i.e. after any gearing). Used to convert ticks/sec <-> RPM so the
-     * tuner's output gains can be plugged directly into a PIDController
-     * that operates on RPM, e.g.:
-     * <pre>
-     *   shooterRPMPID.setPID(kp, ki, kd);
-     *   double power = shooterRPMPID.calculate(currentRPM, targetRPM);
-     *   power += (targetRPM > 0) ? (kF * (targetRPM / MAX_RPM)) : 0.0;
-     * </pre>
-     * For a bare motor this is its ticks-per-revolution (often called
-     * cycles-per-revolution / CPR) spec. If there's external gearing after
-     * the encoder, divide by the gear ratio (output revs per motor rev).
+     * If false, every candidate gain set has {@code kI = 0} and is computed
+     * using the Ziegler-Nichols PD (instead of PID) rule family. Common
+     * choice for velocity/flywheel loops where {@code kF} already handles
+     * steady-state error and an integral term mainly risks windup.
      */
-    public static final double TICKS_PER_REV = 28.0; // e.g. REV HD Hex motor bare shaft CPR
-
-    /**
-     * Target velocity for the RPM-based velocity tuner, in RPM. This is the
-     * RPM equivalent of {@link #VELOCITY_TARGET_TICKS_PER_SEC} and is what
-     * the relay test will oscillate around.
-     */
-    public static final double TARGET_RPM = (VELOCITY_TARGET_TICKS_PER_SEC / TICKS_PER_REV) * 60.0;
-
-    /** Hysteresis band for the RPM-based relay test, in RPM. */
-    public static final double RPM_HYSTERESIS = (VELOCITY_HYSTERESIS_TICKS_PER_SEC / TICKS_PER_REV) * 60.0;
-
-    /**
-     * Maximum sustainable RPM at full power, used to convert this library's
-     * raw kF (power per RPM) into the normalized
-     * {@code power += kF * (targetRPM / MAX_RPM)} form used by the
-     * ShooterConstants-style snippet above. Set this to your mechanism's
-     * real measured max RPM -- the feedforward sweep will print a measured
-     * value you can copy here for next time.
-     */
-    public static final double MAX_RPM = 6000; // placeholder; overwrite with your measured max RPM
+    public static final boolean TUNE_INTEGRAL_TERM = false;
 }
-
