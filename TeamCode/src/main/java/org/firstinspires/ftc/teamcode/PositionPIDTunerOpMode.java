@@ -1,7 +1,7 @@
-package org.firstinspires.ftc.teamcode.pidautotuner;
+package org.firstinspires.ftc.teamcode;
 
 import com.aaravdhawan25.pidautotuner.ftc.PIDMaster;
-import com.aaravdhawan25.pidautotuner.ftc.TuningConfig;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
