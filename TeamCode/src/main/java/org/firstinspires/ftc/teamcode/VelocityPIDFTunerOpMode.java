@@ -32,21 +32,29 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  *         spinning the mechanism up to the target velocity with a real PIDF loop.</li>
  * </ol>
  */
-@TeleOp(name = "PIDF Velocity Auto Tuner")
+@TeleOp(name = "PIDF Auto Tuner (Velocity)")
 public class VelocityPIDFTunerOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        double targetTicksPerSec = TuningConfig.effectiveTargetTicksPerSec();
+
         PIDMaster pid = new PIDMaster(
                 hardwareMap, TuningConfig.MOTOR_NAME, TuningConfig.REVERSED, false,
-                TuningConfig.VELOCITY_TARGET_TICKS_PER_SEC, TuningConfig.VELOCITY_HYSTERESIS_TICKS_PER_SEC,
+                targetTicksPerSec, TuningConfig.VELOCITY_HYSTERESIS_TICKS_PER_SEC,
                 TuningConfig.RELAY_AMPLITUDE, TuningConfig.CYCLES_TO_COLLECT, TuningConfig.CYCLES_TO_IGNORE,
                 TuningConfig.RELAY_TEST_TIMEOUT_S, TuningConfig.FEEDFORWARD_TEST_POWERS,
-                TuningConfig.FEEDFORWARD_SETTLE_TIME_S, TuningConfig.TUNE_INTEGRAL_TERM);
+                TuningConfig.FEEDFORWARD_SETTLE_TIME_S, TuningConfig.TUNE_INTEGRAL_TERM,
+                TuningConfig.TICKS_PER_REV);
 
         telemetry.addLine("=== PIDF Auto Tuner (Velocity) ===");
         telemetry.addData("Motor", TuningConfig.MOTOR_NAME);
-        telemetry.addData("Target velocity (ticks/s)", TuningConfig.VELOCITY_TARGET_TICKS_PER_SEC);
+        telemetry.addData("TICKS_PER_REV", TuningConfig.TICKS_PER_REV);
+        telemetry.addData("Target (ticks/s)", String.format("%.1f", targetTicksPerSec));
+        telemetry.addData("Target (RPM)", String.format("%.1f", TuningConfig.toRPM(targetTicksPerSec)));
+        if (TuningConfig.USE_RPM_TARGET) {
+            telemetry.addLine("(target specified in RPM, converted to ticks/s)");
+        }
         telemetry.addLine("Press START. Phase 1: relay test (automatic).");
         telemetry.update();
 

@@ -24,7 +24,7 @@ dependencies {
 
     // FtcAutoTune: relay-feedback PID/PIDF auto tuner
     // https://github.com/aaravdhawan25/FtcAutoTune
-    implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-core:v0.3.2'
-    implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-ftc:v0.3.2'
+    implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-core:v0.3.3'
+    implementation 'com.github.aaravdhawan25.FtcAutoTune:pidautotuner-ftc:v0.3.3'
 }
 
