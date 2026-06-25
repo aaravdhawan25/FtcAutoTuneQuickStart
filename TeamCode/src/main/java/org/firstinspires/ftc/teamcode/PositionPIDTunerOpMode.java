@@ -36,7 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * constant gravity feedforward ({@code kF * cos(angle)} or similar) on top of
  * these gains in your final code.
  */
-@TeleOp(name = "PID Auto Tuner (Position)")
+@TeleOp(name = "PID Position Auto Tuner")
 public class PositionPIDTunerOpMode extends LinearOpMode {
 
     @Override

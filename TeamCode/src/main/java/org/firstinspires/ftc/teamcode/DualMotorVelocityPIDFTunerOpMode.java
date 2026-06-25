@@ -33,7 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  *     <li>Hold gamepad1.a to live-test the "classic ZN" candidate on both motors.</li>
  * </ol>
  */
-@TeleOp(name = "PIDF Auto Tuner (Dual Velocity)")
+@TeleOp(name = "PIDF Dual Velocity Auto Tuner")
 public class DualMotorVelocityPIDFTunerOpMode extends LinearOpMode {
 
     @Override

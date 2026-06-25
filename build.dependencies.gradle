@@ -18,7 +18,9 @@ dependencies {
 
     // FTCLib: used by the [Local] tuner OpModes for the live-test PID controller
     implementation 'org.ftclib.ftclib:core:2.1.1'
-    implementation 'com.acmerobotics.dashboard:dashboard:0.6.0'
+    implementation('com.acmerobotics.dashboard:dashboard:0.6.0') {
+        exclude group: 'org.firstinspires.ftc'
+    }
 
     // FtcAutoTune: relay-feedback PID/PIDF auto tuner
     // https://github.com/aaravdhawan25/FtcAutoTune
