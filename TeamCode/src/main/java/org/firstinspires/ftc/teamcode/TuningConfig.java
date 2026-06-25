@@ -64,7 +64,7 @@ public class TuningConfig {
      *   REV HD Hex bare  -> 28.0
      *   NeveRest 40      -> 1120.0
      */
-    public static double TICKS_PER_REV = 28.0; // REV HD Hex bare shaft (common for shooters)
+    public static double TICKS_PER_REV = 60; // Gobilda Bare (common for shooters)
 
     /**
      * If true, use VELOCITY_TARGET_RPM as the tuning target (converted to
