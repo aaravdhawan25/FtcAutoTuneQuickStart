@@ -3,119 +3,127 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 
 /**
- * Edit these values for your robot before running either tuner OpMode.
- * Keeping them in one place makes it easy to re-tune a different mechanism
- * just by changing this file.
+ * Edit these values for your robot before running any tuner OpMode.
+ *
+ * <p>The {@code @Config} annotation makes every {@code public static}
+ * field live-tunable via FTC Dashboard (http://192.168.43.1:8080/dash)
+ * while the OpMode is running -- no redeploy needed.
+ *
+ * <p>This is the ONLY file you need to copy into your TeamCode.
+ * Everything else (PIDMaster, DualMotorPIDMaster, the algorithms) comes
+ * from the {@code pidautotuner-ftc} JitPack dependency.
  */
-
 @Config
-public  class TuningConfig {
+public class TuningConfig {
 
     private TuningConfig() {}
 
     // ---- Hardware ------------------------------------------------------
 
-    /** The name of the motor in your hardware configuration, e.g. "flywheel" or "arm". */
-    public static  String MOTOR_NAME = "shooter";
+    /** The name of the motor in your hardware configuration, e.g. "shooter", "arm". */
+    public static String MOTOR_NAME = "shooter";
 
     /** Set true if positive power should move the mechanism toward a *lower* encoder reading. */
-    public static  boolean REVERSED = false;
-
-
-    /** Set true if running position pid tuning OpMode */
-
-    public static  boolean PositionPIDtuner = false;
+    public static boolean REVERSED = false;
 
     // ---- Relay test tuning ---------------------------------------------
 
     /**
-     * Magnitude of the relay (bang-bang) output, from 0 to 1. Pick the
-     * smallest value that reliably overcomes friction/gravity and produces a
-     * clean oscillation. 0.3-0.7 is typical. Too high can be violent or
-     * unsafe for position mechanisms (arms/lifts) -- start low and increase
-     * if the mechanism doesn't oscillate.
+     * Magnitude of the relay (bang-bang) output, from 0 to 1.
+     * 0.3-0.7 is typical. Too high can be violent for position mechanisms
+     * -- start low and increase if the mechanism doesn't oscillate.
      */
-    public static  double RELAY_AMPLITUDE = 0.5;
+    public static double RELAY_AMPLITUDE = 0.5;
 
     /** Number of full oscillation cycles to average for the Ku/Tu calculation. */
-    public static  int CYCLES_TO_COLLECT = 6;
+    public static int CYCLES_TO_COLLECT = 6;
 
     /** Number of initial cycles to discard while the oscillation settles. */
-    public static  int CYCLES_TO_IGNORE = 2;
+    public static int CYCLES_TO_IGNORE = 2;
 
-    /** Safety timeout for the relay test, in seconds, in case the system never oscillates. */
-    public static  double RELAY_TEST_TIMEOUT_S = 15.0;
+    /** Safety timeout for the relay test in seconds. */
+    public static double RELAY_TEST_TIMEOUT_S = 15.0;
 
     // ---- Position tuner specific ----------------------------------------
 
-    /**
-     * Target position for the position PID tuner, in encoder ticks relative
-     * to the position the motor is at when the OpMode starts.
-     */
-    public static  double POSITION_TARGET_TICKS = 400;
+    /** Target offset in encoder ticks from start position (position tuner). */
+    public static double POSITION_TARGET_TICKS = 400;
 
-    /**
-     * Hysteresis band for the position relay test, in encoder ticks. The
-     * relay switches once the measured position crosses
-     * target +/- this value. A few ticks is usually enough; increase if you
-     * see rapid chatter instead of a clean oscillation.
-     */
-    public static  double POSITION_HYSTERESIS_TICKS = 10;
+    /** Hysteresis deadband for the position relay test, in ticks. */
+    public static double POSITION_HYSTERESIS_TICKS = 10;
 
     // ---- Velocity (PIDF) tuner specific -----------------------------------
 
     /**
-     * Target velocity for the velocity PIDF tuner, in encoder ticks per second.
-     * Pick a value representative of where you'll actually run the mechanism
-     * (e.g. your flywheel's shooting speed).
+     * Encoder ticks per revolution of the output shaft.
+     *
+     * Common values:
+     *   GoBILDA 435 RPM  -> 384.5
+     *   GoBILDA 312 RPM  -> 537.7
+     *   GoBILDA 223 RPM  -> 751.8
+     *   REV HD Hex bare  -> 28.0
+     *   NeveRest 40      -> 1120.0
      */
-    public static  double VELOCITY_TARGET_TICKS_PER_SEC = 1500;
-
-    /** Hysteresis band for the velocity relay test, in ticks/sec. */
-    public static  double VELOCITY_HYSTERESIS_TICKS_PER_SEC = 30;
+    public static double TICKS_PER_REV = 28.0; // REV HD Hex bare shaft (common for shooters)
 
     /**
-     * Power levels to use for the feedforward (kF) characterization step.
-     * The motor is run open-loop at each of these powers in turn, and the
-     * steady-state velocity is recorded.
+     * If true, use VELOCITY_TARGET_RPM as the tuning target (converted to
+     * ticks/sec internally). If false, use VELOCITY_TARGET_TICKS_PER_SEC directly.
      */
-    public static  double[] FEEDFORWARD_TEST_POWERS = {0.5, 0.75, 1.0};
+    public static boolean USE_RPM_TARGET = false;
 
-    /** How long to hold each feedforward test power before sampling, in seconds. */
-    public static  double FEEDFORWARD_SETTLE_TIME_S = 1.5;
+    /** Target velocity in RPM. Only used when USE_RPM_TARGET is true. */
+    public static double VELOCITY_TARGET_RPM = 2800;
+
+    /** Target velocity in ticks/sec. Used when USE_RPM_TARGET is false. */
+    public static double VELOCITY_TARGET_TICKS_PER_SEC = 1500;
+
+    /** Hysteresis deadband for the velocity relay test, in ticks/sec. */
+    public static double VELOCITY_HYSTERESIS_TICKS_PER_SEC = 30;
+
+    /** Power levels for the feedforward kF characterization sweep. */
+    public static double[] FEEDFORWARD_TEST_POWERS = {0.5, 0.75, 1.0};
+
+    /** Settle time per power level during the feedforward sweep, in seconds. */
+    public static double FEEDFORWARD_SETTLE_TIME_S = 1.5;
 
     /**
-     * If false, every candidate gain set has {@code kI = 0} and is computed
-     * using the Ziegler-Nichols PD (instead of PID) rule family. Common
-     * choice for velocity/flywheel loops where {@code kF} already handles
-     * steady-state error and an integral term mainly risks windup.
+     * If false, every candidate has kI = 0 and uses ZN PD-only rules.
+     * Recommended for flywheels where kF handles steady-state error.
      */
-    public static  boolean TUNE_INTEGRAL_TERM = false;
+    public static boolean TUNE_INTEGRAL_TERM = false;
 
     // ---- Dual motor velocity tuner specific --------------------------------
 
-    /**
-     * Hardware config name of the second motor for the dual-motor velocity
-     * PIDF tuner (e.g. "flywheel2", "shooterRight"). Both motors will be
-     * tuned together and run with the same kP/kI/kD/kF output.
-     */
-    public static  String MOTOR_NAME_2 = "shooter2";
+    /** Hardware config name of the second motor for the dual-velocity tuner. */
+    public static String MOTOR_NAME_2 = "shooter2";
+
+    /** Direction of the second motor (usually reversed on dual-flywheel setups). */
+    public static boolean REVERSED_2 = true;
 
     /**
-     * Direction of the second motor. Set true if positive power should run
-     * this motor in the opposite physical direction to how the encoder reads
-     * (common on shooter/flywheel setups where motors face each other).
+     * True if both motors have encoders. False if only motor 1 has an encoder
+     * -- motor 2 is still driven but its velocity is not measured.
      */
-    public static final boolean REVERSED_2 = true;
+    public static boolean DUAL_ENCODERS = false;
 
-    /**
-     * Set to true if BOTH motors have encoders plugged in. Set to false if
-     * only the first motor ({@code MOTOR_NAME}) has an encoder connected --
-     * in that case the tuner uses only motor 1's velocity as the measurement
-     * but still drives both motors with the same output power and gains.
-     *
-     * <p>This is common on shooters where only one encoder port is used.
-     */
-    public static final boolean DUAL_ENCODERS = false;
-    public static  boolean REVERSED_2 = true;
+    // ---- Convenience helpers -----------------------------------------------
+
+    /** Returns the effective velocity target in ticks/sec, respecting USE_RPM_TARGET. */
+    public static double effectiveTargetTicksPerSec() {
+        if (USE_RPM_TARGET) {
+            return (VELOCITY_TARGET_RPM / 60.0) * TICKS_PER_REV;
+        }
+        return VELOCITY_TARGET_TICKS_PER_SEC;
+    }
+
+    /** Converts ticks/sec to RPM using TICKS_PER_REV. */
+    public static double toRPM(double ticksPerSec) {
+        return (ticksPerSec / TICKS_PER_REV) * 60.0;
+    }
+
+    /** Converts RPM to ticks/sec using TICKS_PER_REV. */
+    public static double toTicksPerSec(double rpm) {
+        return (rpm / 60.0) * TICKS_PER_REV;
+    }
 }
