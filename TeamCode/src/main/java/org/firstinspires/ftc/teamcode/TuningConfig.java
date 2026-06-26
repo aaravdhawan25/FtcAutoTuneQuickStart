@@ -21,10 +21,22 @@ public class TuningConfig {
     // ---- Hardware ------------------------------------------------------
 
     /** The name of the motor in your hardware configuration, e.g. "shooter", "arm". */
-    public static String MOTOR_NAME = "shooter";
+    public static String MOTOR_NAME = "motor";
+
+    /** Hardware config name of the second motor for the dual-velocity tuner. */
+    public static String MOTOR_NAME_2 = "motor2";
 
     /** Set true if positive power should move the mechanism toward a *lower* encoder reading. */
     public static boolean REVERSED = false;
+
+    /** Direction of the second motor (usually reversed on dual-flywheel setups). */
+    public static boolean REVERSED_2 = true;
+
+    /**
+     * True if both motors have encoders. False if only motor 1 has an encoder
+     * -- motor 2 is still driven but its velocity is not measured.
+     */
+    public static boolean DUAL_ENCODERS = false;
 
     // ---- Relay test tuning ---------------------------------------------
 
@@ -93,19 +105,6 @@ public class TuningConfig {
      */
     public static boolean TUNE_INTEGRAL_TERM = false;
 
-    // ---- Dual motor velocity tuner specific --------------------------------
-
-    /** Hardware config name of the second motor for the dual-velocity tuner. */
-    public static String MOTOR_NAME_2 = "shooter2";
-
-    /** Direction of the second motor (usually reversed on dual-flywheel setups). */
-    public static boolean REVERSED_2 = true;
-
-    /**
-     * True if both motors have encoders. False if only motor 1 has an encoder
-     * -- motor 2 is still driven but its velocity is not measured.
-     */
-    public static boolean DUAL_ENCODERS = false;
 
     // ---- Convenience helpers -----------------------------------------------
 
