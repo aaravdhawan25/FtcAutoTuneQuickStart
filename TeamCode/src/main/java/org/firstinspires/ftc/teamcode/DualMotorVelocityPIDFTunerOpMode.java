@@ -63,11 +63,8 @@ public class DualMotorVelocityPIDFTunerOpMode extends LinearOpMode {
         telemetry.addData("Motor 2", TuningConfig.MOTOR_NAME_2 + (TuningConfig.REVERSED_2 ? " (reversed)" : ""));
         telemetry.addData("Encoder mode", TuningConfig.DUAL_ENCODERS ? "DUAL (both motors)" : "SINGLE (motor 1 only)");
         telemetry.addData("TICKS_PER_REV", TuningConfig.TICKS_PER_REV);
+        telemetry.addData("Target RPM", String.format("%.1f", TuningConfig.VELOCITY_TARGET_RPM));
         telemetry.addData("Target (ticks/s)", String.format("%.1f", targetTicksPerSec));
-        telemetry.addData("Target (RPM)", String.format("%.1f", TuningConfig.toRPM(targetTicksPerSec)));
-        if (TuningConfig.USE_RPM_TARGET) {
-            telemetry.addLine("(target specified in RPM, converted to ticks/s)");
-        }
         telemetry.addLine("Press START. Both motors will oscillate automatically.");
         telemetry.update();
 
