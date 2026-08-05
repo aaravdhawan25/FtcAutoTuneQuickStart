@@ -38,12 +38,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * constant gravity feedforward ({@code kF * cos(angle)} or similar) on top of
  * these gains in your final code.
  */
-@TeleOp(name = "Position PIDF Tuner", group = "FtcAutoTune")
+@TeleOp(name = "Position PID Tuner", group = "FtcAutoTune")
 public class PositionPIDTunerOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(),telemetry);
         PIDMaster pid = new PIDMaster(
                 hardwareMap, TuningConfig.MOTOR_NAME, TuningConfig.REVERSED, true,
                 TuningConfig.POSITION_TARGET_TICKS, TuningConfig.POSITION_HYSTERESIS_TICKS,
@@ -77,7 +77,6 @@ public class PositionPIDTunerOpMode extends LinearOpMode {
 
         // Phase 2: show results, optionally live-test
         while (opModeIsActive()) {
-            telemetry.clearAll();
             for (String line : pid.getResultTelemetryLines()) telemetry.addLine(line);
 
             if (gamepad1.a) {

@@ -31,7 +31,7 @@ public class VelocityPIDFTunerOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(),telemetry);
 
         // Convert RPM target to ticks/sec using: ticks/sec = (RPM * TICKS_PER_REV) / 60.0
         double targetTicksPerSec = TuningConfig.targetTicksPerSec();
@@ -71,7 +71,6 @@ public class VelocityPIDFTunerOpMode extends LinearOpMode {
         }
 
         while (opModeIsActive()) {
-            telemetry.clearAll();
             for (String line : pid.getResultTelemetryLines()) telemetry.addLine(line);
             if (gamepad1.a) {
                 telemetry.addLine();
