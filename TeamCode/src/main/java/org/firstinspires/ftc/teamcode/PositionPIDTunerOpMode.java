@@ -68,7 +68,6 @@ public class PositionPIDTunerOpMode extends LinearOpMode {
 
         if (pid.timedOut() || !pid.isTuningSuccessful()) {
             while (opModeIsActive()) {
-                telemetry.clearAll();
                 for (String line : pid.getTelemetryLines()) telemetry.addLine(line);
                 telemetry.update();
             }
