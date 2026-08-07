@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.aaravdhawan25.pidautotuner.ftc.dashboard.AutoTuneDash;
+import com.aaravdhawan25.pidautotuner.ftc.dashboard.AutoTuneDashboard;
 import com.acmerobotics.dashboard.config.Config;
 
 /**
@@ -13,7 +15,8 @@ import com.acmerobotics.dashboard.config.Config;
  * Everything else (PIDMaster, DualMotorPIDMaster, the algorithms) comes
  * from the {@code pidautotuner-ftc} JitPack dependency.
  */
-@Config
+//@Config //For FtcDash
+@AutoTuneDash
 public class TuningConfig {
 
     private TuningConfig() {}

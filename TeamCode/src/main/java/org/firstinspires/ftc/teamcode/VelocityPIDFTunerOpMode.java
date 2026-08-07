@@ -2,12 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.aaravdhawan25.pidautotuner.ftc.PIDMaster;
 
+import com.aaravdhawan25.pidautotuner.ftc.dashboard.AutoTuneDash;
+import com.aaravdhawan25.pidautotuner.ftc.dashboard.AutoTuneDashboardToggleOpMode;
+import com.aaravdhawan25.pidautotuner.ftc.dashboard.AutoTuneTelemetry;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Utility;
-
 /**
  * Auto-tunes PIDF gains for a velocity-controlled mechanism (flywheel,
  * intake, etc.) using the relay-feedback method.
@@ -32,8 +33,8 @@ public class VelocityPIDFTunerOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(),telemetry);
-
+//        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(),telemetry); // for Ftc Dash
+        telemetry = new AutoTuneTelemetry(hardwareMap,telemetry); // For Pulse
         // Convert RPM target to ticks/sec using: ticks/sec = (RPM * TICKS_PER_REV) / 60.0
         double targetTicksPerSec = TuningConfig.targetTicksPerSec();
 

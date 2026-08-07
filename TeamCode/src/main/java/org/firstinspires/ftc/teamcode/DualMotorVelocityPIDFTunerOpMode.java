@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.aaravdhawan25.pidautotuner.ftc.DualMotorPIDMaster;
 
+import com.aaravdhawan25.pidautotuner.ftc.dashboard.AutoTuneTelemetry;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -40,8 +41,8 @@ public class DualMotorVelocityPIDFTunerOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(),telemetry);
-
+//        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(),telemetry);
+        telemetry = new AutoTuneTelemetry(hardwareMap,telemetry);
         // Convert RPM target to ticks/sec using: ticks/sec = (RPM * TICKS_PER_REV) / 60.0
         double targetTicksPerSec = TuningConfig.targetTicksPerSec();
 
